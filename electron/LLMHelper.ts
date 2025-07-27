@@ -1,51 +1,20 @@
-import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai"
-import fs from "fs"
+import { LLMConfig, LLMProvider, LLMResponse } from './llm/types';
+import { LLMFactory } from './llm/factory';
 
 export class LLMHelper {
-  private model: GenerativeModel
-  private readonly systemPrompt = `You are Wingman AI, a helpful, proactive assistant for any kind of problem or situation (not just coding). For any user input, analyze the situation, provide a clear problem statement, relevant context, and suggest several possible responses or actions the user could take next. Always explain your reasoning. Present your suggestions as a list of options or next steps.`
+  private provider: LLMProvider;
 
-  constructor(apiKey: string) {
-    const genAI = new GoogleGenerativeAI(apiKey)
-    this.model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+  constructor(config: LLMConfig) {
+    this.provider = LLMFactory.createProvider(config);
   }
 
-  private async fileToGenerativePart(imagePath: string) {
-    const imageData = await fs.promises.readFile(imagePath)
-    return {
-      inlineData: {
-        data: imageData.toString("base64"),
-        mimeType: "image/png"
-      }
-    }
-  }
-
-  private cleanJsonResponse(text: string): string {
-    // Remove markdown code block syntax if present
-    text = text.replace(/^```(?:json)?\n/, '').replace(/\n```$/, '');
-    // Remove any leading/trailing whitespace
-    text = text.trim();
-    return text;
-  }
-
-  public async extractProblemFromImages(imagePaths: string[]) {
+  public async extractProblemFromImages(imagePaths: string[]): Promise<LLMResponse> {
     try {
-      const imageParts = await Promise.all(imagePaths.map(path => this.fileToGenerativePart(path)))
-      
-      const prompt = `${this.systemPrompt}\n\nYou are a wingman. Please analyze these images and extract the following information in JSON format:\n{
-  "problem_statement": "A clear statement of the problem or situation depicted in the images.",
-  "context": "Relevant background or context from the images.",
-  "suggested_responses": ["First possible answer or action", "Second possible answer or action", "..."],
-  "reasoning": "Explanation of why these suggestions are appropriate."
-}\nImportant: Return ONLY the JSON object, without any markdown formatting or code blocks.`
-
-      const result = await this.model.generateContent([prompt, ...imageParts])
-      const response = await result.response
-      const text = this.cleanJsonResponse(response.text())
-      return JSON.parse(text)
+      const prompt = `Please analyze these images and extract the key information.`;
+      return await this.provider.generateResponse(prompt, imagePaths);
     } catch (error) {
-      console.error("Error extracting problem from images:", error)
-      throw error
+      console.error("Error extracting problem from images:", error);
+      throw error;
     }
   }
 

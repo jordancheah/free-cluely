@@ -5,9 +5,11 @@ A desktop application to help you cheat on everything.
 ## 🚀 Quick Start Guide
 
 ### Prerequisites
-- Make sure you have Node.js installed on your computer
+- Node.js installed on your computer
 - Git installed on your computer
-- A Gemini API key (get it from [Google AI Studio](https://makersuite.google.com/app/apikey))
+- An API key from one of the supported LLM providers:
+  - Gemini (from [Google AI Studio](https://makersuite.google.com/app/apikey))
+  - OpenAI (from [OpenAI Platform](https://platform.openai.com/api-keys))
 
 ### Installation Steps
 
@@ -24,9 +26,16 @@ npm install
 
 3. Set up environment variables:
    - Create a file named `.env` in the root folder
-   - Add your Gemini API key:
+   - Configure your preferred LLM provider (see `LLM_CONFIG.md` for detailed instructions)
+   - Example for Gemini:
    ```
+   PROVIDER=gemini
    GEMINI_API_KEY=your_api_key_here
+   ```
+   - Example for OpenAI:
+   ```
+   PROVIDER=openai
+   OPENAI_API_KEY=your_api_key_here
    ```
    - Save the file
 
