@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "npm run clean && tsc && vite build",
     "preview": "vite preview",
-    "electron:dev": "tsc -p electron/tsconfig.json && electron .",
-    "app:dev": "concurrently \"vite --port 5180\" \"wait-on http://localhost:5180 && cross-env electron .\""
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && tsc -p electron/tsconfig.json && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "npm run build && electron-builder",
     "app:build": "npm run build && electron-builder",
     "watch": "tsc -p electron/tsconfig.json --watch"
   },
@@ -84,7 +84,7 @@
     "vite": "^5.4.11",
     "vite-plugin-electron": "^0.28.8",
     "vite-plugin-electron-renderer": "^0.14.6",
-    "wait-on": "^8.0.1"
+    "wait-on": "^8.0.4"
   },
   "dependencies": {
     "@google/genai": "^0.12.0",

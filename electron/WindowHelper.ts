@@ -5,16 +5,15 @@ import path from "node:path"
 
 const isDev = process.env.NODE_ENV === "development"
 
-const startUrl = isDev
-  ? "http://localhost:5180"
-  : `file://${path.join(__dirname, "../dist/index.html")}`
-
 export class WindowHelper {
   private mainWindow: BrowserWindow | null = null
   private isWindowVisible: boolean = false
   private windowPosition: { x: number; y: number } | null = null
   private windowSize: { width: number; height: number } | null = null
   private appState: AppState
+  private loadURL: string = isDev 
+    ? 'http://localhost:5173' 
+    : `file://${path.join(__dirname, "../dist/index.html")}`
 
   // Initialize with explicit number type and 0 value
   private screenWidth: number = 0
@@ -25,6 +24,20 @@ export class WindowHelper {
 
   constructor(appState: AppState) {
     this.appState = appState
+    if (isDev) {
+      console.log('Development mode: Loading from Vite dev server');
+    } else {
+      console.log('Production mode: Loading from dist folder');
+    }
+  }
+
+  public setLoadURL(url: string): void {
+    this.loadURL = url;
+    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      this.mainWindow.loadURL(url).catch((err) => {
+        console.error("Failed to load new URL:", err);
+      });
+    }
   }
 
   public setWindowDimensions(width: number, height: number): void {
@@ -117,7 +130,7 @@ export class WindowHelper {
     this.mainWindow.setSkipTaskbar(true)
     this.mainWindow.setAlwaysOnTop(true)
 
-    this.mainWindow.loadURL(startUrl).catch((err) => {
+    this.mainWindow.loadURL(this.loadURL).catch((err) => {
       console.error("Failed to load URL:", err)
     })
 

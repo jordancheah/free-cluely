@@ -31,10 +31,13 @@ export class GeminiProvider implements LLMProvider {
       const imageParts = images ? await Promise.all(images.map(path => this.fileToGenerativePart(path))) : [];
       
       const fullPrompt = `${this.systemPrompt}\n\n${prompt}\n\nReturn response in JSON format:\n{
-  "problem_statement": "A clear statement of the problem or situation.",
-  "context": "Relevant background or context.",
-  "suggested_responses": ["First possible answer or action", "Second possible answer or action", "..."],
-  "reasoning": "Explanation of why these suggestions are appropriate."
+  "solution": {
+    "code": "The code or implementation if applicable, otherwise leave empty",
+    "problem_statement": "A clear statement of the problem or situation.",
+    "context": "Relevant background or context.",
+    "suggested_responses": ["First possible answer or action", "Second possible answer or action", "..."],
+    "reasoning": "Explanation of why these suggestions are appropriate."
+  }
 }\nImportant: Return ONLY the JSON object, without any markdown formatting or code blocks.`;
 
       const result = await this.model.generateContent([fullPrompt, ...imageParts]);

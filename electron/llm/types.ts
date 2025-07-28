@@ -1,8 +1,13 @@
-export interface LLMResponse {
+export interface Solution {
+  code: string;
   problem_statement: string;
   context: string;
   suggested_responses: string[];
   reasoning: string;
+}
+
+export interface LLMResponse {
+  solution: Solution;
 }
 
 export interface LLMProvider {

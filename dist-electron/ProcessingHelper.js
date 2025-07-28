@@ -18,11 +18,33 @@ class ProcessingHelper {
     currentExtraProcessingAbortController = null;
     constructor(appState) {
         this.appState = appState;
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) {
-            throw new Error("GEMINI_API_KEY not found in environment variables");
+        const provider = process.env.PROVIDER?.toLowerCase() || 'gemini';
+        let config;
+        switch (provider) {
+            case 'gemini':
+                const geminiKey = process.env.GEMINI_API_KEY;
+                if (!geminiKey)
+                    throw new Error("GEMINI_API_KEY not found in environment variables");
+                config = {
+                    provider: 'gemini',
+                    apiKey: geminiKey,
+                    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash'
+                };
+                break;
+            case 'openai':
+                const openaiKey = process.env.OPENAI_API_KEY;
+                if (!openaiKey)
+                    throw new Error("OPENAI_API_KEY not found in environment variables");
+                config = {
+                    provider: 'openai',
+                    apiKey: openaiKey,
+                    model: process.env.OPENAI_MODEL || 'gpt-4-vision-preview'
+                };
+                break;
+            default:
+                throw new Error(`Unsupported LLM provider: ${provider}`);
         }
-        this.llmHelper = new LLMHelper_1.LLMHelper(apiKey);
+        this.llmHelper = new LLMHelper_1.LLMHelper(config);
     }
     async processScreenshots() {
         const mainWindow = this.appState.getMainWindow();

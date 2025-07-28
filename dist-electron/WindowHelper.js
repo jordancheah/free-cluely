@@ -1,5 +1,4 @@
 "use strict";
-// electron/WindowHelper.ts
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,15 +7,13 @@ exports.WindowHelper = void 0;
 const electron_1 = require("electron");
 const node_path_1 = __importDefault(require("node:path"));
 const isDev = process.env.NODE_ENV === "development";
-const startUrl = isDev
-    ? "http://localhost:5180"
-    : `file://${node_path_1.default.join(__dirname, "../dist/index.html")}`;
 class WindowHelper {
     mainWindow = null;
     isWindowVisible = false;
     windowPosition = null;
     windowSize = null;
     appState;
+    loadURL = `file://${node_path_1.default.join(__dirname, "../dist/index.html")}`;
     // Initialize with explicit number type and 0 value
     screenWidth = 0;
     screenHeight = 0;
@@ -25,6 +22,14 @@ class WindowHelper {
     currentY = 0;
     constructor(appState) {
         this.appState = appState;
+    }
+    setLoadURL(url) {
+        this.loadURL = url;
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.loadURL(url).catch((err) => {
+                console.error("Failed to load new URL:", err);
+            });
+        }
     }
     setWindowDimensions(width, height) {
         if (!this.mainWindow || this.mainWindow.isDestroyed())
@@ -102,7 +107,7 @@ class WindowHelper {
         }
         this.mainWindow.setSkipTaskbar(true);
         this.mainWindow.setAlwaysOnTop(true);
-        this.mainWindow.loadURL(startUrl).catch((err) => {
+        this.mainWindow.loadURL(this.loadURL).catch((err) => {
             console.error("Failed to load URL:", err);
         });
         const bounds = this.mainWindow.getBounds();
